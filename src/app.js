@@ -17,8 +17,9 @@
 //1 insall express
 const express = require("express");
 const app = express();
+
 //2 port
-const port = process.env.POST || 3000;
+const port = process.env.POST || 3001;
 //3 logic ,pages ,, end points
 
 // app.get('/',(req,res)=>{
@@ -73,7 +74,65 @@ app.get("/team", (req, res) => {
     age: "26",
   });
 });
+app.get("/search", (req, res) => {
+  res.render("search", {
+    title: "search Page",
+    name: "WALAA",
+    city: "palestine",
+    age: "26",
+  });
+});
 
+const mapbox = require("./tools/mapbox");
+const WetherData = require("./tools/WetherData");
+
+//app.get("/search", (req, res) => {
+// if(!req.query.address){
+//  return res.send({ error: "you must proived adress"});
+// }
+// mapbox(req.query.address,(error,data)=>{
+//   if(error){
+//     return res.send({error});
+//   }
+//     WetherData (data.Latitude,data.Longitude ,(error,weatherData)=>{
+//       if(error){
+//         return res.send({error});
+//       }
+//       res.render("search", {
+//         title: "search Page",
+//         name: weatherData,
+//         city: req.query.address,
+//         age: "26",
+//       });
+//     })
+//   })
+
+// });
+
+app.get("/search/weather", (req, res) => {
+  if (!req.query.address) {
+    return res.send({ error: "you must proived adress" });
+  }
+  mapbox(req.query.address, (error, data) => {
+    if (error) {
+      return res.send({ error });
+    }
+    WetherData(data.Latitude, data.Longitude, (error, weatherData) => {
+      if (error) {
+        return res.send({ error });
+      }
+      res.send({
+        forecast: weatherData,
+        location: req.query.address,
+      });
+    });
+  });
+});
+
+app.get("*", (req, res) => {
+  res.send("404 Page Not Founded");
+});
+///////////////////
 //4 listen project on brower== كيف اخلي المشروع يسمع على براوزير
 app.listen(port, () => {
   console.log(`app is listening on port ${port}`);
